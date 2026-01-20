@@ -4,6 +4,11 @@
 
 A specialized web-based diagnostic dashboard built with **Angular**. The goal is to "crawl" and display hardware and network specifications of the host machine through the lens of the browser's sandboxed APIs.
 
+## Live Demo
+
+The latest version of the System-Probe is live and accessible at:
+[https://nyan-lin-tun.github.io/System-Probe/](https://nyan-lin-tun.github.io/System-Probe/)
+
 ## Features
 
 - **Compute & OS:** CPU core count, OS platform/architecture, GPU Renderer.
