@@ -1,0 +1,119 @@
+<div class="terminal-container">
+  <header class="scanline">
+    <h1>>> SYSTEM_PROBE_v1.0</h1>
+    <div class="status" [class.blink]="loading()">
+      {{ loading() ? 'INITIALIZING...' : 'ONLINE' }}
+    </div>
+  </header>
+
+  <div class="grid" *ngIf="specs() as s">
+    <!-- Compute Module -->
+    <section class="module">
+      <h2>// COMPUTE_NODE</h2>
+      <div class="data-row">
+        <label>CORES:</label>
+        <span class="value">{{ s.compute.cores }}</span>
+      </div>
+      <div class="data-row">
+        <label>PLATFORM:</label>
+        <span class="value">{{ s.compute.platform }}</span>
+      </div>
+      <div class="data-row">
+        <label>GPU:</label>
+        <span class="value">{{ s.compute.gpuRenderer }}</span>
+      </div>
+      <div class="data-row">
+        <label>RES:</label>
+        <span class="value">{{ s.compute.screenResolution }}</span>
+      </div>
+    </section>
+
+    <!-- Memory Module -->
+    <section class="module">
+      <h2>// MEMORY_BANK</h2>
+      <div class="data-row">
+        <label>RAM (Est)*:</label>
+        <span class="value">{{ s.memory.deviceMemory }}</span>
+      </div>
+      <div class="disclaimer">* Browser sandboxing limits RAM reporting (~8GB max).</div>
+      <div class="data-row">
+        <label>HEAP USED:</label>
+        <span class="value">{{ s.memory.usedJSHeapSize }}</span>
+      </div>
+      <div class="data-row">
+        <label>HEAP TOTAL:</label>
+        <span class="value">{{ s.memory.totalJSHeapSize }}</span>
+      </div>
+      <div class="data-row">
+        <label>STORAGE QUOTA:</label>
+        <span class="value">{{ s.memory.storageQuota }}</span>
+      </div>
+    </section>
+
+    <!-- Network Module -->
+    <section class="module">
+      <h2>// NET_INTERFACE</h2>
+      <div class="data-row">
+        <label>PUBLIC IP:</label>
+        <span class="value highlight">{{ s.network.ip }}</span>
+      </div>
+      <div class="data-row">
+        <label>ISP:</label>
+        <span class="value">{{ s.network.isp }}</span>
+      </div>
+      <div class="data-row">
+        <label>LOCATION:</label>
+        <span class="value">{{ s.network.city }}, {{ s.network.country }}</span>
+      </div>
+      <div class="data-row">
+        <label>DOWNLINK:</label>
+        <span class="value">{{ s.network.downlink }}</span>
+      </div>
+      <div class="data-row">
+        <label>RTT:</label>
+        <span class="value">{{ s.network.rtt }}</span>
+      </div>
+      <div class="data-row">
+        <label>TYPE:</label>
+        <span class="value">{{ s.network.effectiveType | uppercase }}</span>
+      </div>
+    </section>
+
+    <!-- Geolocation Module -->
+    <section class="module">
+      <h2>// GEO_TRACKER</h2>
+      <div class="data-row">
+        <label>STATUS:</label>
+        <span class="value" [class.highlight]="s.location.status === 'Granted'">
+          {{ s.location.status | uppercase }}
+        </span>
+      </div>
+      <div class="data-row">
+        <label>CITY:</label>
+        <span class="value">{{ s.network.city }}</span>
+      </div>
+      <div class="data-row">
+        <label>COUNTRY:</label>
+        <span class="value">{{ s.network.country }}</span>
+      </div>
+      <div class="data-row">
+        <label>LATITUDE:</label>
+        <span class="value">{{ s.location.latitude }}</span>
+      </div>
+      <div class="data-row">
+        <label>LONGITUDE:</label>
+        <span class="value">{{ s.location.longitude }}</span>
+      </div>
+      <div class="data-row">
+        <label>ACCURACY:</label>
+        <span class="value">{{ s.location.accuracy }}</span>
+      </div>
+    </section>
+  </div>
+
+  <footer class="controls">
+    <button (click)="refreshData()" [disabled]="loading()">
+      [{{ loading() ? 'SCANNING...' : 'RE-SCAN SYSTEM' }}]
+    </button>
+  </footer>
+</div>
