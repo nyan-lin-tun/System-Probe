@@ -37,11 +37,20 @@ export interface LocationSpecs {
   status: 'Permission Denied' | 'Unavailable' | 'Locating...' | 'Granted' | 'Idle';
 }
 
+export interface BatterySpecs {
+  level: string;
+  charging: string;
+  chargingTime: string;
+  dischargingTime: string;
+  supported: boolean;
+}
+
 export interface SystemSpecs {
   compute: ComputeSpecs;
   memory: MemorySpecs;
   network: NetworkSpecs;
   location: LocationSpecs;
+  battery: BatterySpecs;
 }
 
 @Injectable({
@@ -51,25 +60,76 @@ export class Telemetry {
   private http = inject(HttpClient);
 
   async getSystemSpecs(): Promise<SystemSpecs> {
-    const [compute, memory, network, location] = await Promise.all([
+    const [compute, memory, network, location, battery] = await Promise.all([
       this.getComputeSpecs(),
       this.getMemorySpecs(),
       this.getNetworkSpecs(),
-      this.getGeolocation(), // Initial attempt, might require user interaction later
+      this.getGeolocation(),
+      this.getBatterySpecs(),
     ]);
 
-    return { compute, memory, network, location };
+    return { compute, memory, network, location, battery };
   }
 
   private getComputeSpecs(): ComputeSpecs {
     const nav = navigator as any;
+    const uaData = nav.userAgentData;
+    
+    let platform = nav.platform || 'Unknown';
+    let arch = 'Unknown';
+
+    if (uaData) {
+      platform = uaData.platform;
+      // Heuristic for architecture if not directly available
+      if (uaData.brands?.some((b: any) => b.brand.includes('ARM'))) arch = 'ARM';
+      else if (uaData.brands?.some((b: any) => b.brand.includes('Intel'))) arch = 'x86';
+    }
+
+    // Fallback parsing for common cases
+    if (nav.userAgent.includes('Win64') || nav.userAgent.includes('x64')) arch = 'x64';
+    if (nav.userAgent.includes('Macintosh') && nav.userAgent.includes('Intel')) arch = 'Intel'; 
+    // Note: M1/M2 Macs often still report as Intel in userAgent for compat, 
+    // but high hardwareConcurrency (e.g. > 8) is a hint.
+
     return {
       cores: nav.hardwareConcurrency || 'Unknown',
-      platform: nav.userAgentData?.platform || nav.platform || 'Unknown',
+      platform: `${platform} ${arch !== 'Unknown' ? '(' + arch + ')' : ''}`,
       userAgent: nav.userAgent,
       gpuRenderer: this.getGpuRenderer(),
       screenResolution: `${window.screen.width}x${window.screen.height}`,
     };
+  }
+
+  private async getBatterySpecs(): Promise<BatterySpecs> {
+    const nav = navigator as any;
+    if (!nav.getBattery) {
+      return {
+        level: 'N/A',
+        charging: 'N/A',
+        chargingTime: 'N/A',
+        dischargingTime: 'N/A',
+        supported: false
+      };
+    }
+
+    try {
+      const battery = await nav.getBattery();
+      return {
+        level: `${Math.round(battery.level * 100)}%`,
+        charging: battery.charging ? 'Yes' : 'No',
+        chargingTime: battery.chargingTime === Infinity ? 'Unknown' : `${battery.chargingTime}s`,
+        dischargingTime: battery.dischargingTime === Infinity ? 'Unknown' : `${battery.dischargingTime}s`,
+        supported: true
+      };
+    } catch (e) {
+      return {
+        level: 'Error',
+        charging: 'Error',
+        chargingTime: 'Error',
+        dischargingTime: 'Error',
+        supported: false
+      };
+    }
   }
 
   private async getMemorySpecs(): Promise<MemorySpecs> {

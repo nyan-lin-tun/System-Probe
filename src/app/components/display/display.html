@@ -109,6 +109,27 @@
         <span class="value">{{ s.location.accuracy }}</span>
       </div>
     </section>
+
+    <!-- Battery Module -->
+    <section class="module" *ngIf="s.battery.supported">
+      <h2>// POWER_CELL</h2>
+      <div class="data-row">
+        <label>LEVEL:</label>
+        <span class="value" [class.highlight]="s.battery.charging === 'Yes'">{{ s.battery.level }}</span>
+      </div>
+      <div class="data-row">
+        <label>CHARGING:</label>
+        <span class="value">{{ s.battery.charging | uppercase }}</span>
+      </div>
+      <div class="data-row" *ngIf="s.battery.charging === 'Yes'">
+        <label>TIME TO FULL:</label>
+        <span class="value">{{ s.battery.chargingTime }}</span>
+      </div>
+      <div class="data-row" *ngIf="s.battery.charging === 'No'">
+        <label>REMAINING:</label>
+        <span class="value">{{ s.battery.dischargingTime }}</span>
+      </div>
+    </section>
   </div>
 
   <footer class="controls">
